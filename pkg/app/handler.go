@@ -8,10 +8,18 @@ import (
 	"github.com/acoshift/middleware"
 )
 
+func buildHandlerFromMuxMap(m map[string]http.Handler) http.Handler {
+	mux := http.NewServeMux()
+	for pattern, handler := range m {
+		mux.Handle(pattern, handler)
+	}
+	return mux
+}
+
 // Handler gets kou's handler
 func Handler() http.Handler {
 	m := http.NewServeMux()
-	m.Handle("/", mux)
+	m.Handle("/", buildHandlerFromMuxMap(mux))
 	m.Handle("/kou-admin/", configMux)
 	m.Handle("/kou-content/", http.StripPrefix("/kou-content", util.FileServer("kou-content")))
 	return middleware.Chain(middlewares...)(m)
